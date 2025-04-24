@@ -1,29 +1,35 @@
-# Resume-Parser-NLP-Flask-
+# 📄 Resume Parser using NLP & Flask
 
-A simple web-based Resume Parser that extracts key information from PDF or DOCX resumes using Natural Language Processing and displays it in a clean user interface.
+A clean and user-friendly web application that parses resumes in PDF or DOCX format, extracts key information using NLP techniques, and displays it neatly on the frontend.
 
-## 🔍 Features
-- Upload resumes in PDF or DOCX format.
-- Extracts:
-  - Name
-  - Email
+🔗 **Live Soon** | 📦 **Repo:** [Resume-Parser-NLP-Flask-](https://github.com/DAKSHSHARMA2901/Resume-Parser-NLP-Flask-)
+
+## ✨ Features
+
+- Upload resume files (`.pdf`, `.docx`)
+- Automatically extracts:
+  - Full Name
+  - Email Address
   - Phone Number
-  - Skills
-  - Full Text
-- Beautiful animated frontend (HTML + CSS + Animate.css)
-- Backend powered by Flask and NLP libraries like `pdfplumber`, `docx2txt`, and regex.
+  - Key Skills
+  - Full Resume Text
+- Clean frontend (HTML + CSS + Animate.css)
+- Backend built with Flask
+- Uses pdfplumber & docx2txt for text extraction
+- Simple error handling & loading UI
 
 ## 🚀 Tech Stack
-- **Frontend:** HTML, CSS, JavaScript, Animate.css
-- **Backend:** Flask
-- **NLP Libraries:** pdfplumber, docx2txt, re
+
+- **Frontend**: HTML, CSS, Animate.css
+- **Backend**: Python Flask
+- **NLP Tools**: `re`, `pdfplumber`, `docx2txt`
 
 ## 📦 Installation
 
 ```bash
-git clone https://github.com/dakshsharma2901/resume-parser-nlp.git
-cd resume-parser-nlp
+git clone https://github.com/DAKSHSHARMA2901/Resume-Parser-NLP-Flask-.git
+cd Resume-Parser-NLP-Flask-
 python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python app.py
