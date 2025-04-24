@@ -1,6 +1,6 @@
 Flask==2.3.2
 gunicorn==21.2.0
-spacy==3.6.0
+spacy==3.5.4
 pdfminer.six==20231228
 werkzeug==2.3.8
 requests==2.31.0
