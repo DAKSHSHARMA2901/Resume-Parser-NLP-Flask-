@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Parser</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header animate__animated animate__fadeInDown">
+      <h1>📄 Resume Parser</h1>
+      <p class="subtitle">Upload your resume and extract key information instantly</p>
+    </div>
+    
+    <div class="upload-area animate__animated animate__fadeIn animate__delay-1s">
+      <form id="uploadForm" class="dropzone">
+        <div class="file-input-wrapper">
+          <input type="file" name="resume" id="resumeInput" accept=".pdf,.docx" required>
+          <label for="resumeInput" class="file-label">
+            <div class="icon-container">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <span class="drag-text">Drag & drop your resume here or click to browse</span>
+            <span class="file-types">Supports: PDF, DOCX</span>
+          </label>
+        </div>
+        <button type="submit" class="upload-button">
+          <span class="button-text">Parse Resume</span>
+          <span class="button-loader" style="display: none;">
+            <div class="loader"></div>
+          </span>
+        </button>
+      </form>
+    </div>
+
+    <div id="results" class="results-container">
+      <div class="results-card animate__animated animate__fadeInUp">
+        <h2>📌 Extracted Information</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Name:</div>
+            <div id="name" class="info-value pulse-animate"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Email:</div>
+            <div id="email" class="info-value pulse-animate"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Phone:</div>
+            <div id="phone" class="info-value pulse-animate"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Skills:</div>
+            <div id="skills" class="info-value pulse-animate"></div>
+          </div>
+        </div>
+        
+        <div class="full-text-section">
+          <h3>📚 Full Text</h3>
+          <div class="text-container">
+            <pre id="fullText" class="full-text"></pre>
+          </div>
+        </div>
+        
+        <button id="copyButton" class="copy-button">
+          <span>Copy Text</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <div class="status-message" id="statusMessage"></div>
+  </div>
+
+  <script>
+    document.getElementById("uploadForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const uploadButton = document.querySelector('.upload-button');
+      const buttonText = document.querySelector('.button-text');
+      const buttonLoader = document.querySelector('.button-loader');
+      
+      // Show loading state
+      buttonText.style.display = 'none';
+      buttonLoader.style.display = 'flex';
+      uploadButton.disabled = true;
+      
+      fetch("/upload", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        // Hide loading state
+        buttonText.style.display = 'block';
+        buttonLoader.style.display = 'none';
+        uploadButton.disabled = false;
+        
+        // Show results with animation
+        const results = document.getElementById("results");
+        results.style.display = "block";
+        results.classList.add("animate__animated", "animate__fadeInUp");
+        
+        // Populate data with animation
+        document.getElementById("name").textContent = data.name || 'Not found';
+        document.getElementById("email").textContent = data.email || 'Not found';
+        document.getElementById("phone").textContent = data.phone || 'Not found';
+        document.getElementById("skills").textContent = Array.isArray(data.skills) ? data.skills.join(', ') : (data.skills || 'Not found');
+        document.getElementById("fullText").textContent = data.full_text || 'No text extracted';
+        
+        // Add pulse animation to each populated field
+        document.querySelectorAll('.info-value').forEach(el => {
+          if (el.textContent && el.textContent !== 'Not found') {
+            el.classList.add('animate__animated', 'animate__pulse');
+          }
+        });
+        
+        // Show success message
+        showStatusMessage('Resume parsed successfully!', 'success');
+      })
+      .catch(err => {
+        // Hide loading state
+        buttonText.style.display = 'block';
+        buttonLoader.style.display = 'none';
+        uploadButton.disabled = false;
+        
+        showStatusMessage('Error: ' + err, 'error');
+      });
+    });
+    
+    // Drag and drop functionality
+    const dropZone = document.querySelector('.dropzone');
+    const fileInput = document.getElementById('resumeInput');
+    const fileLabel = document.querySelector('.file-label');
+    
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileLabel.classList.add('dragover');
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+      fileLabel.classList.remove('dragover');
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileLabel.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        fileLabel.querySelector('.drag-text').textContent = e.dataTransfer.files[0].name;
+      }
+    });
+    
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) {
+        fileLabel.querySelector('.drag-text').textContent = fileInput.files[0].name;
+      }
+    });
+    
+    // Copy text functionality
+    document.getElementById('copyButton').addEventListener('click', () => {
+      const text = document.getElementById('fullText').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showStatusMessage('Text copied to clipboard!', 'success');
+      }).catch(err => {
+        showStatusMessage('Failed to copy text', 'error');
+      });
+    });
+    
+    function showStatusMessage(message, type) {
+      const statusEl = document.getElementById('statusMessage');
+      statusEl.textContent = message;
+      statusEl.className = 'status-message ' + type;
+      statusEl.style.display = 'block';
+      
+      setTimeout(() => {
+        statusEl.style.opacity = '0';
+        setTimeout(() => {
+          statusEl.style.display = 'none';
+          statusEl.style.opacity = '1';
+        }, 500);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
